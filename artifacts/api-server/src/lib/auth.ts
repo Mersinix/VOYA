@@ -1,8 +1,20 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-const ACCESS_SECRET = process.env["JWT_ACCESS_SECRET"] ?? "voya-access-secret-change-in-production";
-const REFRESH_SECRET = process.env["JWT_REFRESH_SECRET"] ?? "voya-refresh-secret-change-in-production";
+function requireSecret(key: string, devDefault: string): string {
+  const value = process.env[key];
+  if (!value) {
+    if (process.env["NODE_ENV"] === "production") {
+      throw new Error(`[VOYA] Missing required environment variable: ${key}. Set it before deploying.`);
+    }
+    // Dev-only fallback — never reaches production due to guard above
+    return devDefault;
+  }
+  return value;
+}
+
+const ACCESS_SECRET = requireSecret("JWT_ACCESS_SECRET", "voya-access-secret-dev-only-not-for-production");
+const REFRESH_SECRET = requireSecret("JWT_REFRESH_SECRET", "voya-refresh-secret-dev-only-not-for-production");
 const ACCESS_EXPIRES = "15m";
 const REFRESH_EXPIRES_DAYS = 7;
 

@@ -4,9 +4,39 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, BarChart, Users, Zap, CheckCircle2, TrendingUp, Shield } from "lucide-react";
+import { ArrowRight, BarChart, Users, Zap, CheckCircle2, TrendingUp, Shield, ChevronDown } from "lucide-react";
+import { useState } from "react";
+
+const FAQ_ITEMS = [
+  {
+    q: "Qu'est-ce que VOYA et à qui s'adresse la plateforme ?",
+    a: "VOYA est une plateforme SaaS d'affiliation B2B qui connecte des entreprises (partenaires) avec des influenceurs et vendeurs digitaux en Tunisie et dans la région MENA. Elle s'adresse aux marques souhaitant développer leur visibilité et aux créateurs de contenu cherchant à monétiser leur audience.",
+  },
+  {
+    q: "Comment fonctionnent les commissions pour les influenceurs ?",
+    a: "Les influenceurs perçoivent une commission à chaque conversion générée via leur lien d'affiliation unique. Le modèle de commission (pourcentage ou montant fixe) est défini par le partenaire pour chaque campagne. Les paiements sont traités mensuellement.",
+  },
+  {
+    q: "Quelle est la différence entre les niveaux Bronze, Silver, Gold et Platinum ?",
+    a: "Les niveaux sont calculés à partir du nombre total d'abonnés : Bronze (< 10 000), Silver (10 000–49 999), Gold (50 000–99 999), Platinum (100 000+). Les campagnes premium sont réservées aux niveaux supérieurs, offrant des taux de commission plus élevés.",
+  },
+  {
+    q: "Combien de campagnes puis-je lancer avec le Pack Starter ?",
+    a: "Le Pack Starter permet de gérer jusqu'à 3 campagnes actives simultanément. Pour plus de campagnes, le Pack Business (10 campagnes) ou le Pack Premium (illimité) s'adaptent à votre croissance.",
+  },
+  {
+    q: "Comment suivre les performances de mes campagnes ?",
+    a: "Votre tableau de bord partenaire affiche en temps réel les clics, les conversions, le chiffre d'affaires généré et les commissions dues. Vous disposez de liens de tracking uniques par influenceur pour une attribution précise.",
+  },
+  {
+    q: "Est-il possible de changer de plan après l'inscription ?",
+    a: "Oui, vous pouvez upgrader ou downgrader votre abonnement à tout moment depuis votre tableau de bord. Le changement est effectif à la prochaine période de facturation.",
+  },
+];
 
 export default function Home() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Navigation */}
@@ -252,6 +282,92 @@ export default function Home() {
                   </CardContent>
                 </Card>
               </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-24 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Ce qu'ils disent de VOYA</h2>
+            <p className="text-lg text-muted-foreground">
+              Des marques et créateurs qui ont transformé leur croissance grâce à notre plateforme.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Yasmine Cherif",
+                role: "Directrice Marketing, GlamourTN",
+                avatar: "YC",
+                quote: "VOYA nous a permis de multiplier nos ventes par 3 en moins de 6 mois. Le suivi en temps réel et la qualité du réseau d'influenceurs sont incomparables sur le marché tunisien.",
+              },
+              {
+                name: "Mehdi Ben Salah",
+                role: "Créateur de contenu Tech — 85k abonnés",
+                avatar: "MB",
+                quote: "Enfin une plateforme d'affiliation sérieuse en Tunisie ! Les paiements arrivent à temps, les campagnes sont premium et le tableau de bord me donne toutes les stats dont j'ai besoin.",
+              },
+              {
+                name: "Sonia Khalil",
+                role: "CEO, TechPro Solutions",
+                avatar: "SK",
+                quote: "L'intégration avec notre catalogue produits était simple et rapide. En 3 semaines, nous avions déjà 12 influenceurs actifs qui généraient des leads qualifiés pour nos formations.",
+              },
+            ].map((testimonial, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+              >
+                <Card className="h-full">
+                  <CardContent className="p-8 flex flex-col h-full">
+                    <p className="text-muted-foreground italic mb-6 flex-1">"{testimonial.quote}"</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span className="text-xs font-bold text-primary">{testimonial.avatar}</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">{testimonial.name}</p>
+                        <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-24">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Questions fréquentes</h2>
+            <p className="text-lg text-muted-foreground">Tout ce que vous devez savoir avant de commencer.</p>
+          </div>
+          <div className="space-y-3">
+            {FAQ_ITEMS.map((item, i) => (
+              <div key={i} className="border border-border rounded-lg overflow-hidden">
+                <button
+                  className="w-full flex items-center justify-between p-5 text-left font-medium hover:bg-muted/50 transition-colors"
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  aria-expanded={openFaq === i}
+                >
+                  <span>{item.q}</span>
+                  <ChevronDown className={`w-5 h-5 text-muted-foreground shrink-0 ml-4 transition-transform ${openFaq === i ? "rotate-180" : ""}`} />
+                </button>
+                {openFaq === i && (
+                  <div className="px-5 pb-5 text-muted-foreground text-sm leading-relaxed">
+                    {item.a}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>

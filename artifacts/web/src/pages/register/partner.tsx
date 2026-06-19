@@ -28,6 +28,7 @@ const partnerSchema = z.object({
   phone: z.string().min(8, "Valid phone number is required"),
   country: z.string().min(2, "Country is required"),
   website: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  logoUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   description: z.string().optional(),
 });
 
@@ -50,6 +51,7 @@ export default function RegisterPartner() {
       phone: "",
       country: "",
       website: "",
+      logoUrl: "",
       description: "",
     },
   });
@@ -161,13 +163,22 @@ export default function RegisterPartner() {
                 )} />
               </div>
 
-              <FormField control={form.control} name="website" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Website (Optional)</FormLabel>
-                  <FormControl><Input placeholder="https://www.acmecorp.com" {...field} data-testid="input-website" /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
+              <div className="grid md:grid-cols-2 gap-6">
+                <FormField control={form.control} name="website" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website (Optional)</FormLabel>
+                    <FormControl><Input placeholder="https://www.acmecorp.com" {...field} data-testid="input-website" /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="logoUrl" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Logo URL (Optional)</FormLabel>
+                    <FormControl><Input placeholder="https://cdn.acmecorp.com/logo.png" {...field} data-testid="input-logo" /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
 
               <FormField control={form.control} name="description" render={({ field }) => (
                 <FormItem>

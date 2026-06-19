@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 
 import Home from "@/pages/home";
 import Login from "@/pages/login";
+import ForgotPassword from "@/pages/forgot-password";
 import RegisterIndex from "@/pages/register";
 import RegisterPartner from "@/pages/register/partner";
 import RegisterInfluencer from "@/pages/register/influencer";
@@ -27,6 +28,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
+      <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/register" component={RegisterIndex} />
       <Route path="/register/partner" component={RegisterPartner} />
       <Route path="/register/influencer" component={RegisterInfluencer} />

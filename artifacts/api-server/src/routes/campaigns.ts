@@ -2,11 +2,11 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { campaignsTable, categoriesTable, partnersTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
-import { requireAuth } from "../middlewares/requireAuth";
+import { requireAuth, requireRole } from "../middlewares/requireAuth";
 
 const router = Router();
 
-router.get("/campaigns/public", requireAuth, async (req, res): Promise<void> => {
+router.get("/campaigns/public", requireAuth, requireRole("admin", "partner", "influencer"), async (req, res): Promise<void> => {
   const categoryId = req.query["categoryId"] ? parseInt(req.query["categoryId"] as string, 10) : undefined;
   const level = req.query["level"] as string | undefined;
   const page = Math.max(1, parseInt((req.query["page"] as string) || "1", 10));

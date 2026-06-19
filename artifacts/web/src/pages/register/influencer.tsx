@@ -28,6 +28,7 @@ const influencerSchema = z.object({
   phone: z.string().optional(),
   country: z.string().min(2, "Country is required"),
   bio: z.string().optional(),
+  photoUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   tiktokUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   tiktokFollowers: z.coerce.number().optional(),
   instagramUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
@@ -56,6 +57,7 @@ export default function RegisterInfluencer() {
       phone: "",
       country: "",
       bio: "",
+      photoUrl: "",
       tiktokUrl: "",
       tiktokFollowers: 0,
       instagramUrl: "",
@@ -172,6 +174,14 @@ export default function RegisterInfluencer() {
                   <FormItem>
                     <FormLabel>Phone Number (Optional)</FormLabel>
                     <FormControl><Input placeholder="+216 20 000 000" {...field} data-testid="input-phone" /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="photoUrl" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Photo de profil URL (Optionnel)</FormLabel>
+                    <FormControl><Input placeholder="https://example.com/ma-photo.jpg" {...field} data-testid="input-photo" /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />

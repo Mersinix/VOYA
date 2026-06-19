@@ -65,7 +65,7 @@ async function seed() {
   const [p1User, p2User, p3User] = await db.insert(usersTable).values([
     { email: "beauty@glamour.tn", passwordHash: partnerHash, role: "partner", status: "active" },
     { email: "contact@techpro.tn", passwordHash: partnerHash, role: "partner", status: "active" },
-    { email: "info@voyageplus.tn", passwordHash: partnerHash, role: "partner", status: "pending" },
+    { email: "info@voyageplus.tn", passwordHash: partnerHash, role: "partner", status: "active" },
   ]).returning();
 
   const [partner1, partner2, partner3] = await db.insert(partnersTable).values([
