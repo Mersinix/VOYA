@@ -1,1 +1,5 @@
 - [Zod esbuild api-server](zod-esbuild-api-server.md) — `z.email()` and `zod/v4` imports crash esbuild; use Zod v3 syntax and `"zod"` direct import in api-server
+- [Dashboard tab routing](dashboard-tab-routing.md) — dashboards use `?tab=xxx` query params (useSearch from wouter), NOT sub-routes in App.tsx.
+- [customFetch export](customfetch-export.md) — customFetch must be explicitly exported from lib/api-client-react/src/index.ts for frontend hooks to use it.
+- [Express 5 params cast](express5-params.md) — req.params["id"] is `string | string[]` in Express 5; always cast as `req.params["id"] as string` before parseInt.
+- [Drizzle inArray for sets](drizzle-inarray.md) — use `inArray(col, arr)` from drizzle-orm for SQL IN clauses, NOT `sql\`col = ANY(${arr})\`` (causes runtime errors).
