@@ -95,8 +95,61 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pour les partenaires */}
+      {/* Comment ça marche */}
       <section className="py-24 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Comment ça marche</h2>
+            <p className="text-lg text-muted-foreground">
+              Lancez votre première campagne d'affiliation en trois étapes simples.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {[
+              {
+                step: "01",
+                title: "Créez votre compte",
+                desc: "Inscrivez-vous en tant que partenaire ou créateur en moins de 2 minutes. Complétez votre profil et choisissez votre plan d'abonnement.",
+              },
+              {
+                step: "02",
+                title: "Lancez ou rejoignez une campagne",
+                desc: "Les partenaires publient leurs campagnes avec leur modèle de commission. Les influenceurs parcourent les offres et postulent à celles qui correspondent à leur audience.",
+              },
+              {
+                step: "03",
+                title: "Suivez et encaissez",
+                desc: "Chaque conversion est tracée en temps réel via des liens uniques. Les commissions sont calculées automatiquement et versées mensuellement.",
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.15 }}
+                className="relative"
+              >
+                <div className="text-center p-8 rounded-2xl border border-border bg-background shadow-sm h-full">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                    <span className="text-2xl font-extrabold text-primary">{item.step}</span>
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
+                </div>
+                {i < 2 && (
+                  <div className="hidden md:block absolute top-1/2 -right-4 -translate-y-1/2 z-10">
+                    <ArrowRight className="w-6 h-6 text-primary/40" />
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pour les partenaires */}
+      <section className="py-24">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
