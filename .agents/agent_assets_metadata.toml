@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "4SI694RjqVKwppOt1YiVm"
+uri = "file://artifacts/web/public/hero-bg.png"
+type = "image"
+title = "Hero abstract violet and blue"
+
+[[generated]]
+id = "ZF_0rcaGk3ye18E58KFns"
+uri = "file://artifacts/web/public/influencer.png"
+type = "image"
+title = "Influencer creator workspace"
+
+[[generated]]
+id = "rSWQaNwTFT2JhIPoG_rk4"
+uri = "file://artifacts/web/public/partner.png"
+type = "image"
+title = "Business team meeting"

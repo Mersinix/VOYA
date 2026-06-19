@@ -1,0 +1,1 @@
+- [Zod esbuild api-server](zod-esbuild-api-server.md) — `z.email()` and `zod/v4` imports crash esbuild; use Zod v3 syntax and `"zod"` direct import in api-server
