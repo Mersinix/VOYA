@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 import { partnersTable } from "./partners";
 import { categoriesTable } from "./categories";
 import { subCategoriesTable } from "./categories";
+import { influencersTable } from "./influencers";
 
 export const campaignStatusEnum = pgEnum("campaign_status", ["pending", "active", "paused", "completed", "rejected"]);
 export const commissionModelEnum = pgEnum("commission_model", ["cpa", "cpl"]);
@@ -38,7 +39,7 @@ export const campaignsTable = pgTable("campaigns", {
 export const campaignApplicationsTable = pgTable("campaign_applications", {
   id: serial("id").primaryKey(),
   campaignId: integer("campaign_id").notNull().references(() => campaignsTable.id, { onDelete: "cascade" }),
-  influencerId: integer("influencer_id").notNull(),
+  influencerId: integer("influencer_id").notNull().references(() => influencersTable.id, { onDelete: "cascade" }),
   status: applicationStatusEnum("status").notNull().default("pending"),
   message: text("message"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
