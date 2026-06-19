@@ -1,0 +1,1 @@
+- [Database bootstrap](db-bootstrap.md) — DB starts empty; must run `pnpm --filter @workspace/db run push --force` before first use.
