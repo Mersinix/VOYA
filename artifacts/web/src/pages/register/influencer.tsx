@@ -200,7 +200,7 @@ export default function RegisterInfluencer() {
               {/* Social Media */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg border-b pb-2">Social Networks</h3>
-                <FormDescription>Link your profiles and state your follower counts.</FormDescription>
+                <p className="text-sm text-muted-foreground">Link your profiles and state your follower counts.</p>
                 
                 <div className="grid md:grid-cols-2 gap-6 items-end">
                   <FormField control={form.control} name="instagramUrl" render={({ field }) => (
