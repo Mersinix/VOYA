@@ -1,0 +1,449 @@
+Je veux créer une plateforme SaaS professionnelle appelée VOYA.
+
+Vision du projet
+
+VOYA est une plateforme d'affiliation et de mise en relation entre des entreprises partenaires et des influenceurs/digital sellers.
+
+Contrairement aux marketplaces classiques, les produits et services ne sont jamais visibles par le public. Les campagnes sont uniquement accessibles aux influenceurs approuvés par l'administration.
+
+Le système permet aux entreprises de publier des campagnes d'affiliation, et aux influenceurs de choisir ces campagnes, obtenir un lien personnalisé et promouvoir les produits sur leurs propres réseaux sociaux (TikTok, Instagram, Facebook, YouTube, WhatsApp, etc.).
+
+Rôles de l'application
+
+Le système possède exactement 3 rôles :
+
+1. Admin (Administrateur VOYA)
+
+L'administrateur contrôle toute la plateforme.
+
+Gestion des utilisateurs
+Voir tous les partenaires
+Voir tous les influenceurs
+Valider ou refuser les inscriptions
+Suspendre des comptes
+Gérer les rôles
+Gestion des catégories
+
+Les catégories et sous-catégories sont prédéfinies par l'admin.
+
+Exemples de catégories :
+
+Cosmétique
+Voyage
+Restauration
+Mode
+Électronique
+Sport
+Formation
+Santé et bien-être
+
+Chaque catégorie possède plusieurs sous-catégories.
+
+Gestion des campagnes
+
+L'admin peut :
+
+Voir toutes les campagnes
+Valider ou refuser une campagne
+Mettre une campagne en pause
+Voir les statistiques globales
+Gestion des abonnements partenaires
+
+Les entreprises choisissent un pack selon :
+
+Le nombre de campagnes autorisées
+Le nombre d'influenceurs accessibles
+Le niveau des influenceurs accessibles
+
+Exemple :
+
+Pack Starter :
+
+3 campagnes actives
+Accès aux influenceurs Bronze uniquement
+
+Pack Business :
+
+10 campagnes
+Accès aux influenceurs Bronze et Silver
+
+Pack Premium :
+
+Campagnes illimitées
+Accès à tous les niveaux d'influenceurs, y compris Gold et Platinum
+Analytics globales
+
+Dashboard avec :
+
+Nombre total de partenaires
+Nombre total d'influenceurs
+Nombre total de campagnes
+Nombre de ventes
+Chiffre d'affaires généré
+Commissions versées
+2. Partner (Entreprise)
+
+Les entreprises créent un compte pour publier leurs offres.
+
+L'inscription doit contenir :
+
+Nom de l'entreprise
+Nom du responsable
+Email
+Téléphone
+Pays
+Adresse
+Site officiel
+Logo de l'entreprise
+Documents de vérification
+
+Le compte doit être validé par l'admin avant activation.
+
+Dashboard Partner
+
+Afficher :
+
+Nombre de campagnes actives
+Nombre d'influenceurs travaillant sur les campagnes
+Nombre de clics
+Nombre de ventes
+Commissions à payer
+Historique des performances
+Gestion des campagnes
+
+Un partenaire peut créer une campagne avec :
+
+Informations générales :
+
+Titre
+Description
+Images
+Catégorie
+Sous-catégorie
+Date de début
+Date de fin
+
+Informations commerciales :
+
+Lien officiel du produit ou service
+Prix du produit
+Stock disponible (optionnel)
+Objectif de la campagne
+Modèles de rémunération
+
+Le partenaire peut choisir :
+
+CPA
+
+Paiement par vente validée.
+
+Exemple :
+
+Une vente = 20 DT de commission.
+CPL
+
+Paiement par prospect généré.
+
+Exemple :
+
+Une demande de devis = 5 DT.
+Choix des influenceurs
+
+Le partenaire peut filtrer les influenceurs selon :
+
+Pays
+Catégorie de contenu
+Nombre d'abonnés
+Niveau d'influenceur
+Taux de conversion
+Réputation
+
+Il peut :
+
+Envoyer une invitation
+Accepter une demande d'un influenceur
+Faire un contrat privé avec un influenceur VIP avec un prix fixe et un objectif défini
+3. Influencer (Digital Seller)
+
+Toute personne peut créer un compte.
+
+Le compte doit être validé par l'admin.
+
+Informations du profil
+
+Informations personnelles :
+
+Nom complet
+Photo
+Email
+Téléphone
+Pays
+Description personnelle
+
+Réseaux sociaux utilisés :
+
+TikTok (lien + nombre d'abonnés)
+Instagram (lien + nombre d'abonnés)
+Facebook (lien + nombre d'abonnés)
+YouTube (lien + nombre d'abonnés)
+Autres réseaux
+
+Ces informations permettront aux partenaires de choisir les meilleurs profils.
+
+Niveaux des influenceurs
+Bronze
+Moins de 10 000 abonnés
+Silver
+Entre 10 000 et 49 999 abonnés
+Gold
+Entre 50 000 et 99 999 abonnés
+Platinum
+Plus de 100 000 abonnés
+
+Les niveaux donnent accès à :
+
+Des campagnes exclusives
+Des commissions plus importantes
+Des challenges spéciaux
+Dashboard Influencer
+
+Afficher :
+
+Revenus totaux
+Revenus disponibles au retrait
+Nombre de campagnes actives
+Nombre de clics générés
+Nombre de ventes
+Taux de conversion
+Classement général
+Système d'affiliation
+
+Quand un influenceur rejoint une campagne :
+
+Le système génère un lien unique :
+
+exemple :
+
+https://voya.com/ref/ABCD123
+
+Chaque lien doit permettre de suivre :
+
+Nombre de clics
+Nombre de leads
+Nombre de ventes
+Montant généré
+Commission de l'influenceur
+Important : Architecture du tracking
+
+Prévoir une architecture extensible permettant de connecter les sites partenaires.
+
+Le partenaire doit pouvoir :
+
+Installer un pixel VOYA
+Utiliser une API de conversion VOYA
+Envoyer les événements de vente automatiquement
+
+Événements possibles :
+
+CLICK
+VIEW
+LEAD
+PURCHASE
+
+Les ventes validées calculent automatiquement la commission de l'influenceur.
+
+Paiement des influenceurs
+
+Le partenaire déclare ou envoie automatiquement les ventes.
+
+L'application calcule :
+
+Commission totale
+Solde disponible
+Historique des gains
+
+L'influenceur peut demander un retrait à tout moment.
+
+Gamification
+
+Créer :
+
+Leaderboard
+
+Classement :
+
+Top 10 de la semaine
+Top 10 du mois
+Meilleure progression
+Système de réputation
+
+Chaque influenceur possède un score :
+
+Exemple :
+
+Réputation : Excellent ⭐ 4.9/5
+
+Indicateurs :
+
+Taux de conversion
+Nombre de ventes
+Fiabilité
+Respect des règles
+Challenges
+
+Exemple :
+
+Challenge du mois :
+
+1ère place : 1000 DT
+2ème place : 500 DT
+3ème place : 250 DT
+
+Landing Page
+
+Créer une landing page moderne et professionnelle en français.
+
+Sections :
+
+Hero avec slogan VOYA
+Comment ça fonctionne
+Avantages pour les entreprises
+Avantages pour les influenceurs
+Explication du système de gains
+Niveaux des influenceurs
+Questions fréquentes (FAQ)
+Témoignages
+Call To Action inscription
+Système d'authentification
+
+Créer un système complet :
+
+Pages :
+
+Connexion
+Inscription partenaire
+Inscription influenceur
+Mot de passe oublié
+Vérification email
+
+Fonctionnalités :
+
+JWT sécurisé
+Refresh Token
+Gestion des rôles
+Middleware de protection des routes
+Permissions selon le rôle
+Architecture technique obligatoire
+
+Utiliser exactement cette stack :
+
+Monorepo avec Turborepo.
+
+Gestionnaire de package :
+
+PNPM
+
+Langage :
+
+TypeScript strict
+
+Base de données :
+
+PostgreSQL + Prisma ORM
+
+Créer un dossier Prisma avec :
+
+schema.prisma complet
+migrations
+seed.ts avec des données de démonstration
+Structure du monorepo
+voya/
+|
+├── apps/
+│   |
+│   ├── api/              # NestJS Backend
+│   |
+│   ├── admin/            # NextJS Dashboard Admin
+│   |
+│   ├── partner/          # NextJS Dashboard Entreprise
+│   |
+│   └── influencer/       # NextJS Dashboard Influenceur
+|
+├── packages/
+│   |
+│   ├── ui/               # Composants réutilisables
+│   │   ├── Button
+│   │   ├── Input
+│   │   ├── Modal
+│   │   ├── Card
+│   │   ├── Table
+│   │   ├── Dropdown
+│   │   ├── Accordion
+│   │   └── Skeleton
+│   |
+│   ├── types/
+│   |
+│   ├── config/
+│   |
+│   └── utils/
+|
+├── prisma/
+│   ├── schema.prisma
+│   └── seed.ts
+|
+├── turbo.json
+├── pnpm-workspace.yaml
+└── README.md
+Frontend
+
+Utiliser :
+
+NextJS App Router
+TypeScript
+Tailwind CSS uniquement
+Responsive design mobile et desktop
+Dark/Light mode
+Composants réutilisables depuis packages/ui
+Loading Skeleton pour toutes les pages de chargement
+Gestion propre des états et formulaires
+Backend API
+
+Utiliser NestJS avec une architecture propre :
+
+src/
+├── auth/
+├── users/
+├── partners/
+├── influencers/
+├── campaigns/
+├── categories/
+├── subscriptions/
+├── tracking/
+├── commissions/
+├── payments/
+├── analytics/
+└── common/
+
+Créer :
+
+DTOs
+Guards
+Services
+Controllers
+Validation des données
+Gestion des erreurs
+Logs
+Qualité du code
+
+Le projet doit être créé avec :
+
+Architecture scalable de niveau production
+Code propre et commenté
+Convention de nommage cohérente
+Types TypeScript stricts
+Séparation claire des responsabilités
+Préparation pour l'ajout futur d'application mobile
+
+Créer d'abord la structure complète du monorepo, la base de données Prisma, les modèles principaux, les dossiers, les composants UI de base et le système d'authentification, puis développer les modules métier progressivement. 
+
+Ce projet doit être pensé comme une plateforme SaaS professionnelle capable de supporter plusieurs milliers de partenaires et d'influenceurs.
