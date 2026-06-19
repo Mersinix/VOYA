@@ -159,6 +159,10 @@ export function useInfluencerStats() {
   return useQuery({ queryKey: ["influencer", "stats"], queryFn: () => get<any>("/influencer/stats") });
 }
 
+export function useInfluencerProfile() {
+  return useQuery({ queryKey: ["influencer", "profile"], queryFn: () => get<any>("/influencer/profile") });
+}
+
 export function useInfluencerAvailableCampaigns(params?: { page?: number; limit?: number }) {
   return useQuery({
     queryKey: ["influencer", "campaigns", "available", params],

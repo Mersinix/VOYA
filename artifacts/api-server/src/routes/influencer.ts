@@ -56,6 +56,33 @@ router.get("/influencer/stats", ...influencerAuth, async (req, res): Promise<voi
   });
 });
 
+// ─── Full Profile ─────────────────────────────────────────────────────────────
+router.get("/influencer/profile", ...influencerAuth, async (req, res): Promise<void> => {
+  const inf = await getInfluencerForUser(req.user!.userId);
+  if (!inf) { res.status(404).json({ error: "Influencer profile not found" }); return; }
+
+  res.json({
+    fullName: inf.fullName,
+    bio: inf.bio,
+    phone: inf.phone,
+    country: inf.country,
+    photoUrl: inf.photoUrl,
+    instagramUrl: inf.instagramUrl,
+    instagramFollowers: inf.instagramFollowers,
+    tiktokUrl: inf.tiktokUrl,
+    tiktokFollowers: inf.tiktokFollowers,
+    youtubeUrl: inf.youtubeUrl,
+    youtubeFollowers: inf.youtubeFollowers,
+    facebookUrl: inf.facebookUrl,
+    facebookFollowers: inf.facebookFollowers,
+    level: inf.level,
+    totalFollowers: inf.totalFollowers,
+    reputationScore: inf.reputationScore,
+    availableBalance: inf.availableBalance,
+    totalEarnings: inf.totalEarnings,
+  });
+});
+
 // ─── Available Campaigns (marketplace) ────────────────────────────────────────
 router.get("/influencer/campaigns/available", ...influencerAuth, async (req, res): Promise<void> => {
   const inf = await getInfluencerForUser(req.user!.userId);
