@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { useGetMe, getGetMeQueryKey } from "@workspace/api-client-react";
+import { useGetMe, getGetMeQueryKey, setAuthTokenGetter } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { UserProfile, AuthResponse } from "@workspace/api-client-react/src/generated/api.schemas";
+import type { UserProfile, AuthResponse } from "@workspace/api-client-react";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -18,6 +18,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(localStorage.getItem("accessToken"));
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+
+  // Wire the auth token into every API request via the custom-fetch layer
+  useEffect(() => {
+    setAuthTokenGetter(() => localStorage.getItem("accessToken"));
+    return () => {
+      setAuthTokenGetter(null);
+    };
+  }, []);
 
   const { data: user, isLoading: isUserLoading, isError } = useGetMe({
     query: {
