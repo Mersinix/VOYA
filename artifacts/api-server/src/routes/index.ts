@@ -6,6 +6,7 @@ import campaignsRouter from "./campaigns";
 import adminRouter from "./admin";
 import partnerRouter from "./partner";
 import influencerRouter from "./influencer";
+import { trackingRouter } from "./tracking";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(campaignsRouter);
 router.use(adminRouter);
 router.use(partnerRouter);
 router.use(influencerRouter);
+router.use("/tracking", trackingRouter);
 
 export default router;

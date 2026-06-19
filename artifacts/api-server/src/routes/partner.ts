@@ -207,6 +207,58 @@ router.get("/partner/influencers", ...partnerAuth, async (req, res): Promise<voi
   res.json({ influencers: rows, total: count, page, limit });
 });
 
+// ─── Campaign Performance ─────────────────────────────────────────────────────
+router.get("/partner/campaigns/:id/performance", ...partnerAuth, async (req, res): Promise<void> => {
+  const partnerId = await getPartnerIdForUser(req.user!.userId);
+  if (!partnerId) { res.status(404).json({ error: "Partner profile not found" }); return; }
+
+  const campaignId = parseInt(req.params["id"] as string, 10);
+  const [campaign] = await db.select().from(campaignsTable)
+    .where(and(eq(campaignsTable.id, campaignId), eq(campaignsTable.partnerId, partnerId)));
+  if (!campaign) { res.status(404).json({ error: "Campaign not found" }); return; }
+
+  // Get all affiliate links for this campaign with influencer details
+  const links = await db
+    .select({
+      linkId: affiliateLinksTable.id,
+      code: affiliateLinksTable.code,
+      status: affiliateLinksTable.status,
+      totalClicks: affiliateLinksTable.totalClicks,
+      totalLeads: affiliateLinksTable.totalLeads,
+      totalSales: affiliateLinksTable.totalSales,
+      totalEarnings: affiliateLinksTable.totalEarnings,
+      createdAt: affiliateLinksTable.createdAt,
+      influencerName: influencersTable.fullName,
+      influencerLevel: influencersTable.level,
+      influencerPhoto: influencersTable.photoUrl,
+    })
+    .from(affiliateLinksTable)
+    .innerJoin(influencersTable, eq(affiliateLinksTable.influencerId, influencersTable.id))
+    .where(eq(affiliateLinksTable.campaignId, campaignId))
+    .orderBy(sql`${affiliateLinksTable.totalEarnings}::numeric DESC`);
+
+  const totalClicks = links.reduce((s, l) => s + l.totalClicks, 0);
+  const totalSales = links.reduce((s, l) => s + l.totalSales, 0);
+  const totalEarnings = links.reduce((s, l) => s + parseFloat(l.totalEarnings), 0);
+
+  res.json({
+    campaign: {
+      id: campaign.id,
+      title: campaign.title,
+      commissionModel: campaign.commissionModel,
+      commissionAmount: campaign.commissionAmount,
+      status: campaign.status,
+    },
+    summary: {
+      totalInfluencers: links.length,
+      totalClicks,
+      totalSales,
+      totalEarnings: totalEarnings.toFixed(2),
+    },
+    influencerLinks: links,
+  });
+});
+
 // ─── Subscription ─────────────────────────────────────────────────────────────
 router.get("/partner/subscription", ...partnerAuth, async (req, res): Promise<void> => {
   const partnerId = await getPartnerIdForUser(req.user!.userId);

@@ -20,6 +20,168 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useSearch } from "wouter";
 
+// ─── Level system ──────────────────────────────────────────────────────────────
+const LEVEL_ORDER = ["bronze", "silver", "gold", "platinum"];
+const LEVEL_THRESHOLDS: Record<string, number> = { bronze: 0, silver: 500, gold: 2000, platinum: 5000 };
+const LEVEL_NEXT: Record<string, string | null> = { bronze: "silver", silver: "gold", gold: "platinum", platinum: null };
+
+function getProgressToNext(level: string, totalEarnings: number) {
+  const current = LEVEL_THRESHOLDS[level] ?? 0;
+  const nextLevel = LEVEL_NEXT[level];
+  if (!nextLevel) return { percent: 100, current: totalEarnings, next: null, nextName: null };
+  const nextThreshold = LEVEL_THRESHOLDS[nextLevel] ?? 999999;
+  const range = nextThreshold - current;
+  const progress = Math.min(totalEarnings - current, range);
+  return { percent: Math.max(0, Math.round((progress / range) * 100)), current: progress, next: range, nextName: nextLevel };
+}
+
+// ─── Leaderboard Tab ───────────────────────────────────────────────────────────
+function LeaderboardTab({ stats }: { stats: any }) {
+  const [period, setPeriod] = useState<"7d" | "30d" | "all">("all");
+  const { data: leaderboard, isLoading } = useInfluencerLeaderboard({ period });
+
+  const top3 = (leaderboard ?? []).slice(0, 3);
+  const rest = (leaderboard ?? []).slice(3);
+
+  const myLevel = stats?.level ?? "bronze";
+  const myEarnings = parseFloat(stats?.totalEarnings ?? "0");
+  const progress = getProgressToNext(myLevel, myEarnings);
+
+  const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
+  const podiumHeights = ["h-24", "h-32", "h-20"];
+  const podiumTrophies = ["🥈", "🥇", "🥉"];
+  const podiumRings = [
+    "ring-2 ring-gray-300",
+    "ring-4 ring-yellow-400 shadow-yellow-200 shadow-lg",
+    "ring-2 ring-amber-500",
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* My level progress */}
+      {stats && (
+        <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{LEVEL_EMOJIS[myLevel]}</span>
+                <div>
+                  <p className="font-semibold text-sm">Mon niveau : <span className="text-primary capitalize">{myLevel}</span></p>
+                  <p className="text-xs text-muted-foreground">{myEarnings.toFixed(2)} DT gagnés</p>
+                </div>
+              </div>
+              {progress.nextName ? (
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Prochain niveau</p>
+                  <p className="text-sm font-semibold capitalize text-primary">{progress.nextName}</p>
+                </div>
+              ) : (
+                <Badge className="bg-purple-600 text-white">Niveau max !</Badge>
+              )}
+            </div>
+            {progress.nextName && (
+              <div>
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>{progress.current} DT / {progress.next} DT</span>
+                  <span>{progress.percent}%</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-2 rounded-full bg-primary transition-all duration-500"
+                    style={{ width: `${progress.percent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Period filter */}
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold text-lg">🏆 Classement des créateurs</h2>
+        <div className="flex gap-1 bg-muted rounded-lg p-1">
+          {(["7d", "30d", "all"] as const).map(p => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                period === p ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {p === "7d" ? "7 jours" : p === "30d" ? "30 jours" : "Tout"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3">{[...Array(10)].map((_, i) => <Skeleton key={i} className="h-16 rounded-lg" />)}</div>
+      ) : (
+        <>
+          {/* Podium top 3 */}
+          {top3.length === 3 && (
+            <div className="flex items-end justify-center gap-4 py-6 px-4 bg-gradient-to-b from-yellow-50 to-transparent rounded-xl border border-yellow-100">
+              {podiumOrder.map((inf: any, pos: number) => inf ? (
+                <div key={inf.id} className="flex flex-col items-center gap-2 flex-1 max-w-[120px]">
+                  <span className="text-2xl">{podiumTrophies[pos]}</span>
+                  <div className={`w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold text-primary ${podiumRings[pos]}`}>
+                    {inf.photoUrl ? (
+                      <img src={inf.photoUrl} alt={inf.fullName} className="w-full h-full rounded-full object-cover" />
+                    ) : inf.fullName?.charAt(0)}
+                  </div>
+                  <p className="font-semibold text-xs text-center truncate w-full text-center">{inf.fullName}</p>
+                  <p className="text-xs font-bold text-primary">{parseFloat(inf.earnings ?? inf.totalEarnings ?? "0").toFixed(0)} DT</p>
+                  <div className={`${podiumHeights[pos]} w-full rounded-t-lg flex items-end justify-center pb-2 ${
+                    pos === 1 ? "bg-yellow-400/20" : pos === 0 ? "bg-gray-300/30" : "bg-amber-400/20"
+                  }`}>
+                    <span className="text-xs font-bold text-muted-foreground">#{pos === 1 ? 1 : pos === 0 ? 2 : 3}</span>
+                  </div>
+                </div>
+              ) : null)}
+            </div>
+          )}
+
+          {/* Rest of ranking */}
+          <Card>
+            <div className="divide-y">
+              {rest.map((inf: any) => (
+                <div key={inf.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold text-muted-foreground shrink-0">
+                    {inf.rank}
+                  </div>
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
+                    {inf.photoUrl ? (
+                      <img src={inf.photoUrl} alt={inf.fullName} className="w-full h-full rounded-full object-cover" />
+                    ) : inf.fullName?.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">{inf.fullName}</p>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${LEVEL_COLORS[inf.level] ?? ""}`}>{inf.level}</span>
+                      <p className="text-xs text-muted-foreground">{inf.totalFollowers?.toLocaleString()} abonnés</p>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-bold text-sm text-primary">{parseFloat(inf.earnings ?? inf.totalEarnings ?? "0").toFixed(2)} DT</p>
+                    <p className="text-xs text-muted-foreground">{LEVEL_EMOJIS[inf.level]}</p>
+                  </div>
+                </div>
+              ))}
+              {(leaderboard ?? []).length === 0 && (
+                <div className="p-8 text-center text-muted-foreground">
+                  <Trophy className="mx-auto h-10 w-10 mb-3 text-muted-foreground/40" />
+                  <p>Aucun classement disponible pour cette période.</p>
+                </div>
+              )}
+            </div>
+          </Card>
+        </>
+      )}
+    </div>
+  );
+}
+
 type Tab = "dashboard" | "marketplace" | "links" | "leaderboard" | "profile" | "withdrawal";
 
 const TABS: { id: Tab; label: string }[] = [
@@ -312,48 +474,7 @@ export default function InfluencerDashboard() {
       )}
 
       {/* ── Leaderboard ── */}
-      {tab === "leaderboard" && (
-        <div className="space-y-4">
-          <h2 className="font-semibold text-lg">🏆 Classement des créateurs</h2>
-          {leaderboardLoading ? (
-            <div className="space-y-3">{[...Array(10)].map((_, i) => <Skeleton key={i} className="h-16 rounded-lg" />)}</div>
-          ) : (
-            <Card>
-              <div className="divide-y">
-                {(leaderboard ?? []).map((inf: any, i: number) => (
-                  <div key={inf.id} className="flex items-center gap-4 p-4 hover:bg-muted/30">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                      i === 0 ? "bg-yellow-100 text-yellow-800" :
-                      i === 1 ? "bg-gray-100 text-gray-700" :
-                      i === 2 ? "bg-amber-100 text-amber-800" :
-                      "bg-muted text-muted-foreground"
-                    }`}>
-                      {i < 3 ? ["🥇","🥈","🥉"][i] : inf.rank}
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
-                      {inf.fullName?.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{inf.fullName}</p>
-                      <p className="text-xs text-muted-foreground">{inf.totalFollowers?.toLocaleString()} abonnés</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="font-bold text-sm">{inf.totalEarnings} DT</p>
-                      <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${LEVEL_COLORS[inf.level] ?? ""}`}>{inf.level}</span>
-                    </div>
-                  </div>
-                ))}
-                {(leaderboard ?? []).length === 0 && (
-                  <div className="p-8 text-center text-muted-foreground">
-                    <Trophy className="mx-auto h-10 w-10 mb-3 text-muted-foreground/40" />
-                    <p>Aucun classement disponible.</p>
-                  </div>
-                )}
-              </div>
-            </Card>
-          )}
-        </div>
-      )}
+      {tab === "leaderboard" && <LeaderboardTab stats={stats} />}
 
       {/* ── Profile ── */}
       {tab === "profile" && (

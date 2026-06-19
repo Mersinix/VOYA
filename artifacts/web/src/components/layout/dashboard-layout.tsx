@@ -36,6 +36,8 @@ const navItems: Record<string, NavItem[]> = {
     { name: "Tableau de bord", href: "?tab=dashboard", icon: LayoutDashboard },
     { name: "Mes campagnes", href: "?tab=campaigns", icon: Target },
     { name: "Influenceurs", href: "?tab=influencers", icon: Users },
+    { name: "Performance", href: "?tab=performance", icon: BarChart3 },
+    { name: "Intégration", href: "?tab=integration", icon: TrendingUp },
   ],
   influencer: [
     { name: "Tableau de bord", href: "?tab=dashboard", icon: LayoutDashboard },

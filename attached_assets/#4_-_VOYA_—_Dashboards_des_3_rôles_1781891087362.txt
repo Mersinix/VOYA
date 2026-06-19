@@ -1,0 +1,30 @@
+#4 - VOYA — Dashboards des 3 rôles
+What & Why
+Construire les trois espaces privés de la plateforme : dashboard Admin, dashboard Partenaire, dashboard Influenceur. Chaque espace est protégé par le rôle JWT et présente les données et fonctionnalités spécifiques à chaque acteur.
+
+Done looks like
+Dashboard Admin : vue globale (stats totales), liste des partenaires avec validation/refus/suspension, liste des influenceurs avec validation/refus, liste de toutes les campagnes avec validation/refus/pause, gestion des catégories et sous-catégories, gestion des plans d'abonnement
+Dashboard Partenaire : KPIs (campagnes actives, influenceurs, clics, ventes, commissions), création et gestion de campagnes (CPA/CPL), liste des influenceurs filtrables (pays, catégorie, niveau, abonnés), envoi d'invitations, historique des performances
+Dashboard Influenceur : KPIs (revenus, campagnes actives, clics, ventes, taux de conversion), marketplace des campagnes disponibles selon le niveau, génération de lien affilié unique (voya.com/ref/XXXX), suivi des stats par campagne, demande de retrait, classement (leaderboard), profil et réseaux sociaux
+Navigation latérale (sidebar) adaptée à chaque rôle
+Toutes les pages avec skeleton loading
+API complète : CRUD campagnes, gestion utilisateurs admin, stats par rôle, filtres influenceurs
+Out of scope
+Système de tracking pixel/API conversion (tâche suivante)
+Paiements réels / intégration bancaire
+Notifications en temps réel
+Steps
+API Admin — Endpoints : list/approve/reject/suspend partners & influencers, list/validate/refuse/pause campaigns, CRUD categories + sub-categories, CRUD subscription plans, global analytics stats
+API Partenaire — Endpoints : CRUD campaigns, list influencers (avec filtres), send invitation, campaign stats (clics/ventes/commissions), subscription info
+API Influenceur — Endpoints : list available campaigns (filtrées par niveau), join campaign (génère lien affilié unique), campaign stats personnelles, leaderboard, update profile + réseaux sociaux, request withdrawal
+Layout & navigation — Sidebar commune avec variantes selon le rôle, header avec avatar/nom/rôle, breadcrumb, responsive mobile (menu hamburger)
+Dashboard Admin UI — Page stats globale, pages de gestion users (partenaires + influenceurs), pages campagnes admin, page catégories, page plans
+Dashboard Partenaire UI — Page KPIs, page création/édition campagne (formulaire complet CPA/CPL), page influenceurs avec filtres, page performance
+Dashboard Influenceur UI — Page KPIs + revenus, page marketplace campagnes, page mes campagnes (avec liens générés), page leaderboard + gamification, page profil, page retrait
+Relevant files
+artifacts/web/src/App.tsx
+artifacts/api-server/src/app.ts
+lib/db/src/schema/index.ts
+lib/api-spec/openapi.yaml
+Dependencies
+VOYA — Fondation & Authentification

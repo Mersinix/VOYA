@@ -173,10 +173,18 @@ export function useInfluencerMyCampaigns() {
   });
 }
 
-export function useInfluencerLeaderboard() {
+export function useInfluencerLeaderboard(params?: { period?: string }) {
   return useQuery({
-    queryKey: ["influencer", "leaderboard"],
-    queryFn: () => get<any[]>("/influencer/leaderboard"),
+    queryKey: ["influencer", "leaderboard", params],
+    queryFn: () => get<any[]>("/influencer/leaderboard", params as any),
+  });
+}
+
+export function usePartnerCampaignPerformance(campaignId: number | null) {
+  return useQuery({
+    queryKey: ["partner", "campaigns", campaignId, "performance"],
+    queryFn: () => get<any>(`/partner/campaigns/${campaignId}/performance`),
+    enabled: campaignId !== null,
   });
 }
 

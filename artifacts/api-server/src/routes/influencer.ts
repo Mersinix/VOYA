@@ -186,24 +186,56 @@ router.get("/influencer/campaigns/mine", ...influencerAuth, async (req, res): Pr
 });
 
 // ─── Leaderboard ──────────────────────────────────────────────────────────────
-router.get("/influencer/leaderboard", ...influencerAuth, async (_req, res): Promise<void> => {
-  const rows = await db
-    .select({
-      id: influencersTable.id,
-      fullName: influencersTable.fullName,
-      photoUrl: influencersTable.photoUrl,
-      level: influencersTable.level,
-      totalFollowers: influencersTable.totalFollowers,
-      totalEarnings: influencersTable.totalEarnings,
-      reputationScore: influencersTable.reputationScore,
-    })
-    .from(influencersTable)
-    .innerJoin(usersTable, eq(influencersTable.userId, usersTable.id))
-    .where(eq(usersTable.status, "active"))
-    .orderBy(desc(influencersTable.totalEarnings))
-    .limit(20);
+router.get("/influencer/leaderboard", ...influencerAuth, async (req, res): Promise<void> => {
+  const period = (req.query["period"] as string) || "all";
 
-  res.json(rows.map((r, i) => ({ ...r, rank: i + 1 })));
+  // For period-based leaderboard, use commissions table filtered by date
+  // For "all", use total_earnings on influencer profile for performance
+  if (period === "all") {
+    const rows = await db
+      .select({
+        id: influencersTable.id,
+        fullName: influencersTable.fullName,
+        photoUrl: influencersTable.photoUrl,
+        level: influencersTable.level,
+        totalFollowers: influencersTable.totalFollowers,
+        totalEarnings: influencersTable.totalEarnings,
+        reputationScore: influencersTable.reputationScore,
+      })
+      .from(influencersTable)
+      .innerJoin(usersTable, eq(influencersTable.userId, usersTable.id))
+      .where(eq(usersTable.status, "active"))
+      .orderBy(desc(influencersTable.totalEarnings))
+      .limit(20);
+
+    res.json(rows.map((r, i) => ({ ...r, earnings: r.totalEarnings, rank: i + 1 })));
+    return;
+  }
+
+  // Period-based: query commissions
+  const intervalMap: Record<string, string> = { "7d": "7 days", "30d": "30 days" };
+  const interval = intervalMap[period] ?? "30 days";
+
+  const rows = await db.execute(
+    sql`SELECT
+      i.id,
+      i.full_name as "fullName",
+      i.photo_url as "photoUrl",
+      i.level,
+      i.total_followers as "totalFollowers",
+      i.reputation_score as "reputationScore",
+      COALESCE(SUM(CAST(c.amount AS numeric)), 0)::text as earnings
+    FROM influencers i
+    INNER JOIN users u ON i.user_id = u.id
+    LEFT JOIN commissions c ON c.influencer_id = i.id
+      AND c.created_at >= NOW() - INTERVAL ${sql.raw(`'${interval}'`)}
+    WHERE u.status = 'active'
+    GROUP BY i.id, i.full_name, i.photo_url, i.level, i.total_followers, i.reputation_score
+    ORDER BY earnings DESC
+    LIMIT 20`
+  );
+
+  res.json((rows as any[]).map((r: any, i: number) => ({ ...r, rank: i + 1 })));
 });
 
 // ─── Update Profile ───────────────────────────────────────────────────────────

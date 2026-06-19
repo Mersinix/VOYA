@@ -1,0 +1,28 @@
+#5 - VOYA — Tracking & Affiliation
+What & Why
+Construire le système de tracking des liens affiliés : enregistrement des événements (CLICK, VIEW, LEAD, PURCHASE), calcul automatique des commissions, et la gamification (leaderboard, scores de réputation, challenges).
+
+Done looks like
+Endpoint public GET /r/:code qui redirige vers le lien partenaire et enregistre un événement CLICK
+Endpoint API POST /api/tracking/event pour recevoir les événements LEAD et PURCHASE depuis les sites partenaires
+Calcul automatique des commissions à chaque événement PURCHASE validé (selon modèle CPA ou CPL)
+Leaderboard hebdomadaire et mensuel recalculé (top 10 par revenus générés)
+Score de réputation par influenceur (taux de conversion, fiabilité, volume)
+Page "Intégration partenaire" expliquant comment envoyer les événements (documentation)
+Historique complet des événements par lien affilié visible dans le dashboard influenceur et partenaire
+Out of scope
+Pixel JavaScript côté client (snippet) — documentation API seulement
+Fraude et déduplication avancée
+Webhooks sortants
+Steps
+Redirection & tracking CLICK — Route publique /r/:code : cherche le lien affilié, enregistre l'événement CLICK (IP, user-agent, timestamp, referrer), redirige vers l'URL partenaire
+API événements entrants — POST /api/tracking/event : valide la clé API partenaire, accepte les événements VIEW/LEAD/PURCHASE avec les données (montant, référence), crée l'entrée tracking_event
+Calcul des commissions — À chaque PURCHASE validé, calculer la commission selon le modèle de la campagne (CPA = montant fixe, CPL = montant fixe par lead), mettre à jour le solde de l'influenceur
+Leaderboard — API qui calcule le classement des influenceurs par revenus sur 7j / 30j / total, score de réputation basé sur taux de conversion + volume + ancienneté
+Gamification UI — Page leaderboard avec podium top 3 + tableau top 10, badges de niveau (Bronze/Silver/Gold/Platinum) affichés partout, barre de progression vers le niveau suivant
+Relevant files
+artifacts/api-server/src/app.ts
+lib/db/src/schema/index.ts
+artifacts/web/src/App.tsx
+Dependencies
+VOYA — Dashboards des 3 rôles

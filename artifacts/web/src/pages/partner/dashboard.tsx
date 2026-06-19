@@ -12,20 +12,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   usePartnerStats, usePartnerCampaigns, usePartnerInfluencers,
   usePartnerSubscription, useCreateCampaign, useDeleteCampaign,
+  usePartnerCampaignPerformance,
 } from "@/hooks/useApi";
 import { useListCategories } from "@workspace/api-client-react";
 import {
   MousePointerClick, TrendingUp, ShoppingCart, DollarSign,
   Plus, Trash2, Users, Target, BarChart3, CreditCard,
+  ChevronLeft, Code, Copy, Globe, Zap,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-type Tab = "dashboard" | "campaigns" | "influencers";
+type Tab = "dashboard" | "campaigns" | "influencers" | "performance" | "integration";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "dashboard", label: "Tableau de bord" },
   { id: "campaigns", label: "Mes campagnes" },
   { id: "influencers", label: "Annuaire influenceurs" },
+  { id: "performance", label: "Performance" },
+  { id: "integration", label: "Intégration" },
 ];
 
 const STATUS_COLORS: Record<string, string> = {
@@ -148,6 +152,358 @@ function CreateCampaignForm({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
+// ─── Performance Tab ───────────────────────────────────────────────────────────
+function PerformanceTab() {
+  const { data: campaignsData, isLoading } = usePartnerCampaigns({ limit: 50 });
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const { data: perf, isLoading: perfLoading } = usePartnerCampaignPerformance(selectedId);
+
+  if (selectedId !== null) {
+    return (
+      <div className="space-y-5">
+        <button
+          onClick={() => setSelectedId(null)}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronLeft className="h-4 w-4" /> Retour à la liste
+        </button>
+
+        {perfLoading ? (
+          <div className="space-y-4">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
+        ) : perf ? (
+          <>
+            <div>
+              <h2 className="font-semibold text-lg">{perf.campaign?.title}</h2>
+              <p className="text-sm text-muted-foreground capitalize">{perf.campaign?.commissionModel?.toUpperCase()} — {perf.campaign?.commissionAmount} DT / conversion</p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-4">
+              <StatCard title="Influenceurs" value={perf.summary?.totalInfluencers} icon={Users} />
+              <StatCard title="Clics" value={perf.summary?.totalClicks?.toLocaleString()} icon={MousePointerClick} color="text-blue-500" />
+              <StatCard title="Ventes" value={perf.summary?.totalSales} icon={ShoppingCart} color="text-green-500" />
+              <StatCard title="Commissions" value={`${perf.summary?.totalEarnings ?? "0"} DT`} icon={DollarSign} color="text-amber-500" />
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Détail par influenceur</CardTitle>
+                <CardDescription>Performance de chaque lien d'affiliation</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {(perf.influencerLinks ?? []).length === 0 ? (
+                  <div className="text-center py-10 text-muted-foreground">
+                    <Users className="mx-auto h-10 w-10 mb-3 text-muted-foreground/40" />
+                    <p>Aucun influenceur n'a encore rejoint cette campagne.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y">
+                    {(perf.influencerLinks ?? []).map((link: any) => (
+                      <div key={link.linkId} className="flex items-center justify-between py-3 gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
+                            {link.influencerName?.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm truncate">{link.influencerName}</p>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${LEVEL_COLORS[link.influencerLevel] ?? ""}`}>{link.influencerLevel}</span>
+                              <span className="text-xs text-muted-foreground font-mono">{link.code}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-6 text-sm shrink-0">
+                          <div className="text-center">
+                            <p className="font-semibold">{link.totalClicks}</p>
+                            <p className="text-xs text-muted-foreground">Clics</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-semibold">{link.totalSales}</p>
+                            <p className="text-xs text-muted-foreground">Ventes</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-semibold text-primary">{link.totalEarnings} DT</p>
+                            <p className="text-xs text-muted-foreground">Commissions</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </>
+        ) : (
+          <p className="text-muted-foreground text-sm">Campagne introuvable.</p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="font-semibold text-lg">Performance par campagne</h2>
+        <p className="text-sm text-muted-foreground">Sélectionnez une campagne pour voir les stats détaillées.</p>
+      </div>
+      {isLoading ? (
+        <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-20 rounded-lg" />)}</div>
+      ) : (campaignsData?.campaigns ?? []).length === 0 ? (
+        <div className="text-center py-16 text-muted-foreground">
+          <BarChart3 className="mx-auto h-12 w-12 mb-4 text-muted-foreground/40" />
+          <p>Aucune campagne créée.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {(campaignsData?.campaigns ?? []).map((c: any) => (
+            <button
+              key={c.id}
+              onClick={() => setSelectedId(c.id)}
+              className="w-full text-left"
+            >
+              <Card className="hover:shadow-md hover:border-primary/30 transition-all cursor-pointer">
+                <CardContent className="p-4 flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-medium truncate">{c.title}</p>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${STATUS_COLORS[c.status] ?? ""}`}>{c.status}</span>
+                    </div>
+                    <div className="flex gap-4 text-xs text-muted-foreground">
+                      <span>{c.commissionAmount} DT / {c.commissionModel?.toUpperCase()}</span>
+                      <span>👆 {c.totalClicks} clics</span>
+                      <span>🛒 {c.totalSales} ventes</span>
+                    </div>
+                  </div>
+                  <TrendingUp className="h-5 w-5 text-muted-foreground shrink-0" />
+                </CardContent>
+              </Card>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Integration Tab ───────────────────────────────────────────────────────────
+function IntegrationTab() {
+  const { toast } = useToast();
+  const { data: stats } = usePartnerStats();
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://voya.tn";
+
+  const copy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copié !" });
+  };
+
+  const snippetPurchase = `// Signaler une vente (CPA)
+fetch("${baseUrl}/api/tracking/event", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    code: "CODE_AFFILIATION",   // ex: "XK7P2Q"
+    eventType: "purchase",
+    amount: "149.00",           // montant de la vente (optionnel)
+    externalRef: "ORDER-12345", // votre référence commande
+  })
+});`;
+
+  const snippetLead = `// Signaler un lead (CPL)
+fetch("${baseUrl}/api/tracking/event", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    code: "CODE_AFFILIATION",
+    eventType: "lead",
+    externalRef: "FORM-SUBMIT-789",
+  })
+});`;
+
+  const snippetPixel = `<!-- Pixel VOYA — à placer sur votre page de confirmation -->
+<script>
+(function() {
+  var code = new URLSearchParams(window.location.search).get('voya_code');
+  if (code) {
+    fetch("${baseUrl}/api/tracking/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: code, eventType: "purchase" })
+    });
+  }
+})();
+<\/script>`;
+
+  return (
+    <div className="space-y-6 max-w-3xl">
+      <div>
+        <h2 className="font-semibold text-lg">Intégration partenaire</h2>
+        <p className="text-sm text-muted-foreground">
+          Envoyez vos événements de conversion à VOYA depuis votre site e-commerce.
+        </p>
+      </div>
+
+      {/* How it works */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {[
+          { icon: Globe, title: "1. Lien affilié", desc: "L'influenceur partage un lien /r/CODE qui redirige vers votre site et enregistre le clic." },
+          { icon: Zap, title: "2. Événement", desc: "Votre site envoie un événement VOYA lors d'un achat ou d'un formulaire soumis." },
+          { icon: DollarSign, title: "3. Commission", desc: "VOYA calcule automatiquement la commission et crédite l'influenceur." },
+        ].map(({ icon: Icon, title, desc }) => (
+          <Card key={title} className="border-dashed">
+            <CardContent className="p-4">
+              <Icon className="h-6 w-6 text-primary mb-2" />
+              <p className="font-medium text-sm mb-1">{title}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Endpoint */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Endpoint</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center gap-2 p-3 bg-muted rounded-lg font-mono text-sm">
+            <span className="text-green-600 font-bold text-xs shrink-0">POST</span>
+            <span className="flex-1 truncate">{baseUrl}/api/tracking/event</span>
+            <button onClick={() => copy(`${baseUrl}/api/tracking/event`)} className="shrink-0">
+              <Copy className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Aucune clé API requise. Seul le <code className="bg-muted px-1 rounded">code</code> d'affiliation est nécessaire pour identifier l'influenceur.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Payload schema */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Champs du payload</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left">
+                  <th className="pb-2 pr-4 font-medium text-muted-foreground">Champ</th>
+                  <th className="pb-2 pr-4 font-medium text-muted-foreground">Type</th>
+                  <th className="pb-2 pr-4 font-medium text-muted-foreground">Requis</th>
+                  <th className="pb-2 font-medium text-muted-foreground">Description</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {[
+                  { field: "code", type: "string", required: "Oui", desc: "Code du lien affilié (ex: XK7P2Q)" },
+                  { field: "eventType", type: "\"purchase\" | \"lead\" | \"view\"", required: "Oui", desc: "Type d'événement" },
+                  { field: "amount", type: "string", required: "Non", desc: "Montant de la vente en DT (optionnel)" },
+                  { field: "externalRef", type: "string", required: "Non", desc: "Votre référence commande/lead interne" },
+                  { field: "metadata", type: "string", required: "Non", desc: "Données supplémentaires libres (JSON stringifié)" },
+                ].map(row => (
+                  <tr key={row.field}>
+                    <td className="py-2 pr-4 font-mono text-xs text-primary">{row.field}</td>
+                    <td className="py-2 pr-4 font-mono text-xs text-muted-foreground">{row.type}</td>
+                    <td className="py-2 pr-4">
+                      <span className={`px-1.5 py-0.5 rounded text-xs ${row.required === "Oui" ? "bg-red-50 text-red-600" : "bg-muted text-muted-foreground"}`}>
+                        {row.required}
+                      </span>
+                    </td>
+                    <td className="py-2 text-xs text-muted-foreground">{row.desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Code snippets */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Code className="h-4 w-4" />
+            <CardTitle className="text-base">Exemple — Signaler une vente (CPA)</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            <pre className="bg-[#0d1117] text-[#e6edf3] rounded-lg p-4 text-xs overflow-x-auto leading-relaxed">
+              <code>{snippetPurchase}</code>
+            </pre>
+            <button
+              onClick={() => copy(snippetPurchase)}
+              className="absolute top-2 right-2 p-1.5 rounded bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <Copy className="h-3.5 w-3.5 text-white" />
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Code className="h-4 w-4" />
+            <CardTitle className="text-base">Exemple — Signaler un lead (CPL)</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            <pre className="bg-[#0d1117] text-[#e6edf3] rounded-lg p-4 text-xs overflow-x-auto leading-relaxed">
+              <code>{snippetLead}</code>
+            </pre>
+            <button
+              onClick={() => copy(snippetLead)}
+              className="absolute top-2 right-2 p-1.5 rounded bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <Copy className="h-3.5 w-3.5 text-white" />
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Code className="h-4 w-4" />
+            <CardTitle className="text-base">Pixel côté navigateur (page de confirmation)</CardTitle>
+          </div>
+          <CardDescription>À placer sur votre page de confirmation de commande. Lit le code du paramètre URL <code className="bg-muted px-1 rounded">voya_code</code>.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            <pre className="bg-[#0d1117] text-[#e6edf3] rounded-lg p-4 text-xs overflow-x-auto leading-relaxed">
+              <code>{snippetPixel}</code>
+            </pre>
+            <button
+              onClick={() => copy(snippetPixel)}
+              className="absolute top-2 right-2 p-1.5 rounded bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <Copy className="h-3.5 w-3.5 text-white" />
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-blue-200 bg-blue-50">
+        <CardContent className="p-4 flex gap-3">
+          <Zap className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-blue-900">Lien de redirection affilié</p>
+            <p className="text-xs text-blue-700 mt-1">
+              Chaque influenceur obtient un lien unique de la forme <code className="bg-blue-100 px-1 rounded">{baseUrl}/r/CODE</code>.
+              Ce lien enregistre automatiquement le clic et redirige vers votre URL produit.
+              Le code est inclus comme paramètre <code className="bg-blue-100 px-1 rounded">voya_code</code> dans la redirection si vous ajoutez <code className="bg-blue-100 px-1 rounded">?voya_code=CODE</code> à votre URL produit.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 export default function PartnerDashboard() {
   const search = useSearch();
   const tab = (new URLSearchParams(search).get("tab") as Tab) || "dashboard";
@@ -173,15 +529,15 @@ export default function PartnerDashboard() {
     <DashboardLayout title="Espace Partenaire" role="partner">
       <div className="flex gap-1 overflow-x-auto border-b mb-6 pb-0">
         {TABS.map(t => (
-          <button
+          <a
             key={t.id}
-            onClick={() => { window.location.search = `?tab=${t.id}`; }}
+            href={`?tab=${t.id}`}
             className={`px-4 py-2 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors ${
               tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             {t.label}
-          </button>
+          </a>
         ))}
       </div>
 
@@ -208,9 +564,11 @@ export default function PartnerDashboard() {
                   <CardTitle>Campagnes récentes</CardTitle>
                   <CardDescription>Vos programmes d'affiliation actifs</CardDescription>
                 </div>
-                <Button size="sm" onClick={() => { window.location.search = "?tab=campaigns"; setShowCreateForm(true); }}>
-                  <Plus className="h-4 w-4 mr-1" /> Nouvelle
-                </Button>
+                <a href="?tab=campaigns">
+                  <Button size="sm">
+                    <Plus className="h-4 w-4 mr-1" /> Nouvelle
+                  </Button>
+                </a>
               </CardHeader>
               <CardContent>
                 {campaignsLoading ? (
@@ -309,9 +667,16 @@ export default function PartnerDashboard() {
                         <span>{c.totalClicks} clics · {c.totalSales} ventes</span>
                       </div>
                     </div>
-                    <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-600 shrink-0" onClick={() => handleDelete(c.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <a href="?tab=performance">
+                        <Button size="sm" variant="ghost" className="text-primary hover:text-primary shrink-0">
+                          <BarChart3 className="h-4 w-4" />
+                        </Button>
+                      </a>
+                      <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-600 shrink-0" onClick={() => handleDelete(c.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -383,6 +748,12 @@ export default function PartnerDashboard() {
           )}
         </div>
       )}
+
+      {/* Performance */}
+      {tab === "performance" && <PerformanceTab />}
+
+      {/* Integration */}
+      {tab === "integration" && <IntegrationTab />}
     </DashboardLayout>
   );
 }
